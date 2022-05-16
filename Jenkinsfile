@@ -5,18 +5,11 @@ pipeline{
 
 	
 	stages {
-		stage('Install') {
-			
-			steps{
-				sh 'TAG="$REPOSITORY_NAME.$REPOSITORY_BRANCH.$ENVIRONMENT_NAME.$(date +%Y-%m-%d.%H.%M.%S).$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | head -c 8)"'
-				sh 'sed -i "s@CONTAINER_IMAGE@""$REPOSITORY_URI:$TAG""@" hello-k8s.yml'
-			}			
-		}
-
+		
 		stage('Build') {
 
 			steps {
-				sh 'sudo docker build --tag $REPOSITORY_URI:$TAG .'
+				sh 'sudo docker build --tag 203343854792.dkr.ecr.ap-northeast-2.amazonaws.com/hello-eks:latest .'
                
 			}
 		}
@@ -30,7 +23,7 @@ pipeline{
 		stage('Push') {
 
 			steps {
-				sh 'sudo docker push $REPOSITORY_URI:$TAG'
+				sh 'sudo docker push 203343854792.dkr.ecr.ap-northeast-2.amazonaws.com/hello-eks:latest'
 			}
 		}
 

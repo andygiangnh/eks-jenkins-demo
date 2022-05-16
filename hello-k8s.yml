@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
         - name: hello-k8s
-          image: CONTAINER_IMAGE
+          image: 203343854792.dkr.ecr.ap-northeast-2.amazonaws.com/hello-eks:latest
           securityContext:
             privileged: false
             readOnlyRootFilesystem: true
