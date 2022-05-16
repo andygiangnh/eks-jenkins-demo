@@ -5,11 +5,15 @@ pipeline{
 
 	
 	stages {
+		stage('Install') {
+			TAG="$REPOSITORY_NAME.$REPOSITORY_BRANCH.$ENVIRONMENT_NAME.$(date +%Y-%m-%d.%H.%M.%S).$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | head -c 8)"
+			sed -i 's@CONTAINER_IMAGE@'"$REPOSITORY_URI:$TAG"'@' hello-k8s.yml
+		}
 
 		stage('Build') {
 
 			steps {
-				sh 'sudo docker build -t patelsaheb/hellonodejs:eks .'
+				sh 'sudo docker build --tag $REPOSITORY_URI:$TAG .'
                
 			}
 		}
@@ -17,26 +21,21 @@ pipeline{
         stage('login') {
 
             steps {
-        
-		        withCredentials([string(credentialsId: 'DOCKER_PWD', variable: 'PASSWORD')]) {
-                    sh 'sudo docker login -u patelsaheb -p $PASSWORD'
-                }
+		        $(aws ecr get-login --no-include-email)
             }
         }
 		stage('Push') {
 
 			steps {
-				sh 'sudo docker push patelsaheb/hellonodejs:eks'
+				sh 'sudo docker push $REPOSITORY_URI:$TAG'
 			}
 		}
 
         stage('eks deploy') {
 
 			steps {
-				sh 'kubectl get -o yaml deploy/hello-world-nodejs > deploy.yaml'
-                sh "sed -i 's/hellonodejs:latest/hellonodejs:eks/g' deploy.yaml"
-                sh 'kubectl apply -f deploy.yaml'
-                sh 'kubectl rollout restart deployment hello-world-nodejs'
+				sh 'kubectl apply -f hello-k8s.yml'
+                sh 'kubectl rollout restart deployment hello-k8s'
 			}
 		}
 	}
