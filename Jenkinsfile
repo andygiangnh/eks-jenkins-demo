@@ -14,17 +14,14 @@ pipeline{
 			}
 		}
         
-        stage('login') {
+        stage('Push') {
 
-            steps {
-		        sh '$(aws ecr get-login --no-include-email)'
-            }
-        }
-		stage('Push') {
-
-			steps {
-				sh 'sudo docker push 203343854792.dkr.ecr.ap-northeast-2.amazonaws.com/hello-eks:latest'
-			}
+			script{
+                        docker.withRegistry('https://203343854792.dkr.ecr.ap-northeast-2.amazonaws.com', 'ecr:ap-northeast-2:aws-credentials') {
+                    app.push("${env.BUILD_NUMBER}")
+                    app.push("latest")
+                    }
+                }
 		}
 
         stage('eks deploy') {
