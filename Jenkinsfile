@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
 		AWS_ACCOUNT_ID="203343854792"
-        AWS_DEFAULT_REGION="ap-northeast-2"
+        AWS_DEFAULT_REGION="ap-southeast-1"
         IMAGE_REPO_NAME="hello-eks"
         IMAGE_TAG="${GIT_COMMIT}"
         REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
@@ -39,6 +39,7 @@ pipeline {
 			steps{  
 				script {
 						sh "docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${REPOSITORY_URI}:${IMAGE_TAG}"
+						sh "docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${REPOSITORY_URI}:latest"
 						sh "docker push ${REPOSITORY_URI}:${IMAGE_TAG}"
 						sh "docker push ${REPOSITORY_URI}:latest"
 				}
@@ -49,6 +50,7 @@ pipeline {
 		stage('Deploy to EKS') {
 			steps{
 				script {
+					sh "sed -i 's/REPOSITORY_URI/${REPOSITORY_URI}/g' ./hello-k8s.yml"
 					sh "sed -i 's/IMAGE_VERSION/${IMAGE_TAG}/g' ./hello-k8s.yml"
 					sh "kubectl apply -f hello-k8s.yml"
 				}
