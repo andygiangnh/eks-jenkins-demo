@@ -50,7 +50,7 @@ pipeline {
 		stage('Deploy to EKS') {
 			steps{
 				script {
-					sh "sed -i 's/REPOSITORY_URI/${REPOSITORY_URI}/g' ./hello-k8s.yml"
+					sh "sed -i 's|'REPOSITORY_URI'|${REPOSITORY_URI}|g' ./hello-k8s.yml"
 					sh "sed -i 's/IMAGE_VERSION/${IMAGE_TAG}/g' ./hello-k8s.yml"
 					sh "kubectl apply -f hello-k8s.yml"
 				}
